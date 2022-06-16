@@ -27,7 +27,7 @@ resource "random_pet" "lambda_bucket_name" {
 }
 
 resource "aws_s3_bucket" "lambda_bucket" {
-  bucket = random_pet.lambda_bucket_name.id
+  bucket        = random_pet.lambda_bucket_name.id
   force_destroy = true
 }
 data "archive_file" "lambda_student_portal" {
@@ -57,10 +57,10 @@ resource "aws_lambda_function" "student_portal" {
 
   environment {
     variables = {
-      USERS_TABLE="T_Student",
-      USER_POOL_ID="${aws_cognito_user_pool.ter_sportal.id}",
-      USER_POOL_CLIENT_ID="${aws_cognito_user_pool_client.ter_sportal_client.id}",
-      REGION="ap-south-1",
+      USERS_TABLE         = "T_Student",
+      USER_POOL_ID        = "${aws_cognito_user_pool.ter_sportal.id}",
+      USER_POOL_CLIENT_ID = "${aws_cognito_user_pool_client.ter_sportal_client.id}",
+      REGION              = "ap-south-1",
     }
   }
 
@@ -136,18 +136,18 @@ resource "aws_apigatewayv2_integration" "student_portal" {
 }
 
 resource "aws_apigatewayv2_route" "get" {
-  api_id = aws_apigatewayv2_api.lambda.id
-  route_key = "GET /{any+}" 
+  api_id    = aws_apigatewayv2_api.lambda.id
+  route_key = "GET /{any+}"
   target    = "integrations/${aws_apigatewayv2_integration.student_portal.id}"
 }
 resource "aws_apigatewayv2_route" "post" {
-  api_id = aws_apigatewayv2_api.lambda.id
-  route_key = "POST /{any+}" 
+  api_id    = aws_apigatewayv2_api.lambda.id
+  route_key = "POST /{any+}"
   target    = "integrations/${aws_apigatewayv2_integration.student_portal.id}"
 }
 
 resource "aws_cloudwatch_log_group" "api_gw" {
-  name = "/aws/api_gw/${aws_apigatewayv2_api.lambda.name}"
+  name              = "/aws/api_gw/${aws_apigatewayv2_api.lambda.name}"
   retention_in_days = 30
 }
 
@@ -163,15 +163,15 @@ resource "aws_lambda_permission" "api_gw" {
 # ////////////////////////////////////////////////////////////
 
 resource "aws_apigatewayv2_authorizer" "api_gateway_authorizer" {
-  name              = "jwt-auth"
-  api_id            = aws_apigatewayv2_api.lambda.id
-  authorizer_uri    =aws_lambda_function.student_portal.invoke_arn
-  identity_sources  = ["$request.header.Authorization"]
-  authorizer_type = "JWT"
- jwt_configuration {
+  name             = "jwt-auth"
+  api_id           = aws_apigatewayv2_api.lambda.id
+  authorizer_uri   = aws_lambda_function.student_portal.invoke_arn
+  identity_sources = ["$request.header.Authorization"]
+  authorizer_type  = "JWT"
+  jwt_configuration {
     audience = ["${aws_cognito_user_pool_client.ter_sportal_client.id}"]
     issuer   = "https://${aws_cognito_user_pool.ter_sportal.endpoint}"
- }
+  }
 }
 
 
@@ -223,47 +223,47 @@ EOF
 # }
 
 resource "aws_cognito_user_pool" "ter_sportal" {
-    
-    name = "studentT"
-     account_recovery_setting {
+
+  name = "studentT"
+  account_recovery_setting {
     recovery_mechanism {
       name     = "verified_phone_number"
       priority = 2
     }
   }
-  auto_verified_attributes = [ "email" ]  
-    username_configuration {
-      case_sensitive = false
-    }
+  auto_verified_attributes = ["email"]
+  username_configuration {
+    case_sensitive = false
+  }
 
-    
-    /** Required Standard Attributes*/
-    schema {
-      attribute_data_type = "String"
-      mutable = true
-      name = "email"
-      required = true
-      string_attribute_constraints {
-        min_length = 1
-        max_length = 2048
-      }
-    }
 
-    schema {
-    name = "Department"
+  /** Required Standard Attributes*/
+  schema {
     attribute_data_type = "String"
-    mutable = true
-    required = false
+    mutable             = true
+    name                = "email"
+    required            = true
+    string_attribute_constraints {
+      min_length = 1
+      max_length = 2048
+    }
+  }
+
+  schema {
+    name                = "Department"
+    attribute_data_type = "String"
+    mutable             = true
+    required            = false
     string_attribute_constraints {
       min_length = 1
       max_length = 256
     }
   }
   schema {
-    name = "ClassNo"
+    name                = "ClassNo"
     attribute_data_type = "String"
-    mutable = true
-    required = false
+    mutable             = true
+    required            = false
     string_attribute_constraints {
       min_length = 1
       max_length = 256
@@ -273,16 +273,16 @@ resource "aws_cognito_user_pool" "ter_sportal" {
 resource "aws_cognito_user_pool_client" "ter_sportal_client" {
   name = "T-Spclient"
 
-  user_pool_id = aws_cognito_user_pool.ter_sportal.id
-  explicit_auth_flows = [ "ALLOW_ADMIN_USER_PASSWORD_AUTH","ALLOW_CUSTOM_AUTH","ALLOW_USER_PASSWORD_AUTH","ALLOW_USER_SRP_AUTH","ALLOW_REFRESH_TOKEN_AUTH" ]
-  generate_secret = false
+  user_pool_id                  = aws_cognito_user_pool.ter_sportal.id
+  explicit_auth_flows           = ["ALLOW_ADMIN_USER_PASSWORD_AUTH", "ALLOW_CUSTOM_AUTH", "ALLOW_USER_PASSWORD_AUTH", "ALLOW_USER_SRP_AUTH", "ALLOW_REFRESH_TOKEN_AUTH"]
+  generate_secret               = false
   prevent_user_existence_errors = "ENABLED"
-  supported_identity_providers = [ "COGNITO" ]
-  refresh_token_validity = 30
-  access_token_validity = 1
-  id_token_validity = 1
-  enable_token_revocation = true
-} 
+  supported_identity_providers  = ["COGNITO"]
+  refresh_token_validity        = 30
+  access_token_validity         = 1
+  id_token_validity             = 1
+  enable_token_revocation       = true
+}
 resource "aws_dynamodb_table" "StudentsT" {
   name = "T_Student"
   attribute {
@@ -293,9 +293,9 @@ resource "aws_dynamodb_table" "StudentsT" {
     name = "sk"
     type = "S"
   }
-  hash_key = "id"
-  range_key = "sk"
-  billing_mode     = "PAY_PER_REQUEST" 
+  hash_key     = "id"
+  range_key    = "sk"
+  billing_mode = "PAY_PER_REQUEST"
 }
 resource "aws_iam_role_policy" "ter_sportal_policy" {
   name = "role_policy"

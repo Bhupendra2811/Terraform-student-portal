@@ -18,13 +18,6 @@ function adminAddUserToGroup({ UserPoolId, username, groupName }) {
     Username: username,
   }).promise();
 }
-
-// AWS.config.update({
-//   accessKeyId: "AKIAT3NZ4P4CXBLHP55I",
-//   secretAccessKey: "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",
-//   region: "ap-south-1"
-// });
-
 /////////////////////////////////////////
 ///////////////////////////////////////////////////
 const USERS_TABLE = process.env.USERS_TABLE || "Students";
@@ -89,7 +82,10 @@ app.post("/studentdetails/:studentId", function (req, res) {
       value,
     },
   };
-   dynamoDb.put(params).promise().then(data=>res.json(data));
+  dynamoDb
+    .put(params)
+    .promise()
+    .then((data) => res.json(data));
 });
 
 //dynamoDB student Details
