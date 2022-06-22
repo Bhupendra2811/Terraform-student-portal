@@ -100,12 +100,18 @@ resource "aws_iam_role_policy_attachment" "lambda_policy" {
 resource "aws_apigatewayv2_api" "lambda" {
   name          = "serverless_lambda_gw"
   protocol_type = "HTTP"
+    cors_configuration {
+    allow_origins = ["*"]
+    allow_methods = ["POST", "GET", "OPTIONS"]
+    allow_headers = ["content-type"]
+    max_age = 300
+  }
 }
 
 resource "aws_apigatewayv2_stage" "lambda" {
   api_id = aws_apigatewayv2_api.lambda.id
 
-  name        = "serverless_lambda_stage"
+  name        = "$default"
   auto_deploy = true
 
   access_log_settings {
@@ -173,9 +179,6 @@ resource "aws_apigatewayv2_authorizer" "api_gateway_authorizer" {
     issuer   = "https://${aws_cognito_user_pool.ter_sportal.endpoint}"
   }
 }
-
-
-
 resource "aws_iam_role" "invocation_role" {
   name = "api_gateway_auth_invocation"
   path = "/"

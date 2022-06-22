@@ -5,10 +5,11 @@ const app = express();
 const { v1: uuidv1 } = require("uuid");
 const cors = require("cors");
 const AWS = require("aws-sdk");
+// const jwt_decode = require("jwt-decode");
 const { use } = require("express/lib/application");
 AWS.config.update({ region: "ap-south-1" });
-(UserPoolId = "ap-south-1_imwV6cZNn"),
-  (ClientId = "3oulu935701glf6nuncfsbqgkc");
+(UserPoolId = "ap-south-1_olSEdsCUs"),
+  (ClientId = "5ipbhafnb88k62h59v9sfkqgc4");
 
 const COGNITO_CLIENT = new AWS.CognitoIdentityServiceProvider({});
 function adminAddUserToGroup({ UserPoolId, username, groupName }) {
@@ -20,12 +21,13 @@ function adminAddUserToGroup({ UserPoolId, username, groupName }) {
 }
 /////////////////////////////////////////
 ///////////////////////////////////////////////////
-const USERS_TABLE = process.env.USERS_TABLE || "Students";
+const USERS_TABLE = process.env.USERS_TABLE || "T_Student";
 const dynamoDb = new AWS.DynamoDB.DocumentClient();
 
 app.use(cors({ origin: true, credentials: true }));
 app.use(express.json());
 
+  // res.jwtpayload = jwt_decode(req.headers.authorization);
 app.post("/createuser", async function (req, res) {
   const { username, email, password, groupName, department, classNo } =
     req.body;
@@ -56,7 +58,7 @@ app.post("/createuser", async function (req, res) {
 
   if (groupName == "Student") {
     var params = {
-      TableName: "Students",
+      TableName: "T_Student",
       Item: {
         studentId: uuidv1(),
         ssk: "User Attributes",
@@ -75,7 +77,7 @@ app.post("/createuser", async function (req, res) {
 app.post("/studentdetails/:studentId", function (req, res) {
   const { title, value } = req.body;
   var params = {
-    TableName: "Students",
+    TableName: "T_Student",
     Item: {
       studentId: req.params.studentId,
       ssk: title,
@@ -145,6 +147,4 @@ app.post("/students/:studentId", function (req, res) {
     .then((data) => res.json(data))
     .catch((err) => res.json(err));
 });
-app.listen(5000, console.log("Server chaalu che http://localhost:5000"));
-
 module.exports.handler = serverless(app);
